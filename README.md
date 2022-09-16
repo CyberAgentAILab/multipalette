@@ -2,20 +2,37 @@
 
 This repository is the official implementation of Color Recommendation for Vector Graphic Documents based on Multi-Palette Representation
 
-Paper | System video | ...
+Paper | System video
 
-### Quick demo
+![Overview_image](docs/overview.png)
+
+### Prerequisites
+
+- Python:3.8
+- Poetry: 1.1.*
+
+### Setup
+
+Install requirements and run jupyter.
 
 ```
 poetry install
 poetry run jupyter lab
 ```
 
-Try color recommendation on a notebook notebooks/colorRecomm.ipynb.
+### Quick demo
 
-There are some json sample files in crello_samples/.
-You can create a json file from crello dataset on notebooks/jsonFileCreator.ipynb.
+`notebooks/recomm_colors.ipynb`: recommend colors for multiple palettes in a design
+- Trained model of color prediction are in trained_models/.
+- Json files for test are pre-created in data/model_test_input/crello_samples/.
 
-Try to train color representation model on notebooks/modelTrain.ipynb.
+You can train a color model on a notebook `notebooks/train_model.ipynb`. We recommended GPU resources to train this model (e.g. Tesla T4 * 1).
+You can also create a json file for test from crello dataset on a notebook `notebooks/create_json_file.ipynb`.
 
+### Data
 
+`data/training_data/metadata_colors`: extracted color palettes for Image-SVG-Text elements from Crello-dataset-v1 
+- [the lastest Crello-dataset](https://github.com/CyberAgentAILab/canvas-vae/blob/main/docs/crello-dataset.md)
+`data/training_data/data_bert/data_color`: color corpus of train, validation, and test dataset, and color vocabulary from train dataset
+`data/trained_models`: trained model for color recommendation
+`model_test_input`: json sample files for testing the results of color recommendation
