@@ -31,7 +31,7 @@ You can also create a json file for test from crello dataset on a notebook `note
 
 ### Data
 
-`data/training_data/metadata_colors`: extracted color palettes for Image-SVG-Text elements from Crello-dataset-v1 ([the lastest Crello-dataset](https://github.com/CyberAgentAILab/canvas-vae/blob/main/docs/crello-dataset.md))
+`data/training_data/metadata_colors`: extracted color palettes for Image-SVG-Text elements from [Crello-dataset-v1](https://storage.googleapis.com/ailab-public/canvas-vae/crello-dataset-v1.zip) ([the lastest Crello-dataset](https://github.com/CyberAgentAILab/canvas-vae/blob/main/docs/crello-dataset.md))
 
 `data/training_data/data_bert/data_color`: color corpus of train, validation, and test dataset, and color vocabulary from train dataset
 
