@@ -1,21 +1,20 @@
 [tool.poetry]
-name = "crello_color_recomm"
+name = "multipalette"
 version = "0.1.0"
-description = ""
+description = "Color Recommendation for Vector Graphic Documents based on Multi-Palette Representation"
 authors = ["qiuqianru <qiuqianru@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-jupyterlab = "^3.2.4"
 ipycanvas = "^0.13.1"
-sklearn = "^0.0"
 opencv-python = "^4.6.0"
 matplotlib = "^3.5.3"
 pandas = "^1.4.4"
+scikit-learn = "^1.1.2"
 
 [tool.poetry.dev-dependencies]
 jupyterlab-requirements = "^0.13.0"
-jupyterlab = "3.2.4"
+jupyterlab = "^3.4.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
