@@ -1,8 +1,8 @@
 # Color recommendation for vector graphic documents 
 
-This repository is the official implementation of Color Recommendation for Vector Graphic Documents based on Multi-Palette Representation
+Official implementation of Color Recommendation for Vector Graphic Documents based on Multi-Palette Representation
 
-Paper | System video
+[arXiv](https://arxiv.org/abs/2209.10820)
 
 ![Overview_image](docs/overview.png)
 
