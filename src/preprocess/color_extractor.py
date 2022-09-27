@@ -1,25 +1,28 @@
 # extract main colors by kmeans from sklearn
 
+import math
 import os
+import sys
+from operator import attrgetter, itemgetter
+
+import cv2
 import numpy as np
 from PIL import Image
-from operator import itemgetter, attrgetter
-import math
-import cv2
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
 
-import sys
-sys.path.append('../utils')
+sys.path.append("../utils")
 
-from color_convertor import rgb_to_lab, lab_to_rgb
+from color_convertor import lab_to_rgb, rgb_to_lab
+
 
 def color_cluster_kmeans(image, color_numbers):
     # cluster the pixel intensities
     cluster = KMeans(n_clusters=color_numbers)
     cluster.fit(image)
-    
+
     return cluster
+
 
 # find the closest pixel in image with cluster centers
 def real_centroids(cluster_centers, image):
@@ -33,8 +36,9 @@ def real_centroids(cluster_centers, image):
                 minDis = tmpDis
                 tmpC = i
         real_centers.append(tmpC)
-        
+
     return real_centers
+
 
 def get_colors(image, color_numbers):
     cluster = color_cluster_kmeans(image, color_numbers)
@@ -42,24 +46,25 @@ def get_colors(image, color_numbers):
     # build a histogram of clusters and then create a figure
     # representing the number of pixels labeled to each color
     hist = centroid_histogram(cluster.labels_)
-    
+
     # find the closest pixel in image with cluster centers (result seems same)
     real_centers = real_centroids(cluster.cluster_centers_, image)
     (colors, colors_lab, rates, palette) = create_palette(hist, real_centers)
-    
-    
+
     return (colors, colors_lab, rates, palette)
+
 
 # get historgram of extracted color centroids
 def centroid_histogram(labels):
     # grab the number of different clusters and create a histogram
     numLabels = np.arange(0, len(np.unique(labels)) + 1)
-    (hist, _) = np.histogram(labels, bins = numLabels)
+    (hist, _) = np.histogram(labels, bins=numLabels)
     # normalize the histogram, such that it sums to one
     hist = hist.astype("float")
     hist /= hist.sum()
 
     return hist
+
 
 # create palette with color rates
 def create_palette(hist, centroids):
@@ -69,7 +74,7 @@ def create_palette(hist, centroids):
     colors = []
     colors_lab = []
     rates = []
-    palette = np.zeros((50, 300, 3), dtype = "uint8")
+    palette = np.zeros((50, 300, 3), dtype="uint8")
     # sort colors decreasing
     hist_centroids = list(zip(hist, centroids))
     hist_centroids.sort(key=itemgetter(0), reverse=True)
@@ -82,13 +87,13 @@ def create_palette(hist, centroids):
             endX = startX + (rate * 300)
             lab = color.astype("uint8").tolist()
             rgb = lab_to_rgb(lab)
-    
+
             cv2.rectangle(palette, (int(startX), 0), (int(endX), 50), rgb, -1)
             colors_lab.append(lab)
             colors.append(rgb)
             rates.append(rate)
             startX = endX
-    # draw border line for easy check in light gray #D3D3D3 
+    # draw border line for easy check in light gray #D3D3D3
     cv2.rectangle(palette, (0, 0), (300, 50), (211, 211, 211), 2)
-        
+
     return (colors, colors_lab, rates, palette)

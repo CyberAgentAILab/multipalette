@@ -9,7 +9,7 @@ Official implementation of Color Recommendation for Vector Graphic Documents bas
 ### Prerequisites
 
 - Python:3.8
-- Poetry: 1.1.*
+- Poetry: 1.2.*
 
 ### Setup
 

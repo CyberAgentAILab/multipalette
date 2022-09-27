@@ -1,13 +1,19 @@
 import tensorflow as tf
-from tensorflow.keras import regularizers
-
 from model_config import Config
+from tensorflow.keras import regularizers
 
 
 class EmbeddingProcessor(tf.keras.layers.Layer):
-    def __init__(self, vocab_szie, embedding_size=768, max_seq_len=512,
-                 segment_size=3, hidden_dropout_prob=0.0, initializer_range=0.02,
-                 **kwargs):
+    def __init__(
+        self,
+        vocab_szie,
+        embedding_size=768,
+        max_seq_len=512,
+        segment_size=3,
+        hidden_dropout_prob=0.0,
+        initializer_range=0.02,
+        **kwargs,
+    ):
         super(EmbeddingProcessor, self).__init__(**kwargs)
         self.vocab_size = vocab_szie
         self.embedding_size = embedding_size
@@ -17,30 +23,32 @@ class EmbeddingProcessor(tf.keras.layers.Layer):
         self.initializer_range = initializer_range
 
     def build(self, input_shape):
-        self.token_embedding = tf.keras.layers.Embedding(input_dim=self.vocab_size,
-                                                         output_dim=self.embedding_size,
-                                                         embeddings_initializer=tf.keras.initializers.TruncatedNormal(
-                                                             self.initializer_range),
-                                                         name="token_embedding",
-                                                         dtype=tf.float32
-                                                         )
-        self.segment_embedding = tf.keras.layers.Embedding(input_dim=self.segment_size,
-                                                           output_dim=self.embedding_size,
-                                                           embeddings_initializer=tf.keras.initializers.TruncatedNormal(
-                                                               self.initializer_range),
-                                                           name="segment_embedding",
-                                                           dtype=tf.float32)
-        self.positional_embedding = self.add_weight(name='positional_embeddings',
-                                                    shape=(self.max_seq_len, self.embedding_size),
-                                                    initializer=tf.keras.initializers.TruncatedNormal(
-                                                        self.initializer_range),
-                                                    dtype=tf.float32)
+        self.token_embedding = tf.keras.layers.Embedding(
+            input_dim=self.vocab_size,
+            output_dim=self.embedding_size,
+            embeddings_initializer=tf.keras.initializers.TruncatedNormal(self.initializer_range),
+            name="token_embedding",
+            dtype=tf.float32,
+        )
+        self.segment_embedding = tf.keras.layers.Embedding(
+            input_dim=self.segment_size,
+            output_dim=self.embedding_size,
+            embeddings_initializer=tf.keras.initializers.TruncatedNormal(self.initializer_range),
+            name="segment_embedding",
+            dtype=tf.float32,
+        )
+        self.positional_embedding = self.add_weight(
+            name="positional_embeddings",
+            shape=(self.max_seq_len, self.embedding_size),
+            initializer=tf.keras.initializers.TruncatedNormal(self.initializer_range),
+            dtype=tf.float32,
+        )
 
         self.output_layer_norm = tf.keras.layers.LayerNormalization(
-            name="layer_norm", axis=-1, epsilon=1e-12, dtype=tf.float32)
+            name="layer_norm", axis=-1, epsilon=1e-12, dtype=tf.float32
+        )
 
-        self.output_dropout = tf.keras.layers.Dropout(
-            rate=self.hidden_dropout_prob, dtype=tf.float32)
+        self.output_dropout = tf.keras.layers.Dropout(rate=self.hidden_dropout_prob, dtype=tf.float32)
         super(EmbeddingProcessor, self).build(input_shape)
 
     def call(self, inputs):
@@ -56,6 +64,7 @@ class EmbeddingProcessor(tf.keras.layers.Layer):
         output = self.output_dropout(output)
         return output
 
+
 def scaled_dot_product_attention(q, k, v, mask):
     matmul_qk = tf.matmul(q, k, transpose_b=True)  # (..., seq_len_q, seq_len_k)
     # scale matmul_qk
@@ -63,7 +72,7 @@ def scaled_dot_product_attention(q, k, v, mask):
     scaled_attention_score = matmul_qk / tf.math.sqrt(dk)
     # add mask to scaled attention score
     if mask is not None:
-        scaled_attention_score += (tf.cast(mask[:, tf.newaxis, tf.newaxis, :], dtype=tf.float32) * -1e9)
+        scaled_attention_score += tf.cast(mask[:, tf.newaxis, tf.newaxis, :], dtype=tf.float32) * -1e9
     # softmax for seq_len_k normolization
     attention_weights = tf.nn.softmax(scaled_attention_score, axis=-1)  # (..., seq_len_q, seq_len_k)
     output = tf.matmul(attention_weights, v)  # (..., seq_len_q, depth_v)
@@ -79,13 +88,15 @@ class MultiHeadAttention(tf.keras.layers.Layer):
 
         self.depth = d_model // self.num_heads
 
-        self.wq = tf.keras.layers.Dense(d_model, 
-#                                         kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4), 
-                                        bias_regularizer=regularizers.l2(Config['bias_regularizer']))
-        self.wk = tf.keras.layers.Dense(d_model, bias_regularizer=regularizers.l2(Config['bias_regularizer']))
-        self.wv = tf.keras.layers.Dense(d_model, bias_regularizer=regularizers.l2(Config['bias_regularizer']))
+        self.wq = tf.keras.layers.Dense(
+            d_model,
+            #                                         kernel_regularizer=regularizers.l1_l2(l1=1e-5, l2=1e-4),
+            bias_regularizer=regularizers.l2(Config["bias_regularizer"]),
+        )
+        self.wk = tf.keras.layers.Dense(d_model, bias_regularizer=regularizers.l2(Config["bias_regularizer"]))
+        self.wv = tf.keras.layers.Dense(d_model, bias_regularizer=regularizers.l2(Config["bias_regularizer"]))
 
-        self.dense = tf.keras.layers.Dense(d_model, bias_regularizer=regularizers.l2(Config['bias_regularizer']))
+        self.dense = tf.keras.layers.Dense(d_model, bias_regularizer=regularizers.l2(Config["bias_regularizer"]))
 
     def split_heads(self, x, batch_size):
         """
@@ -114,17 +125,25 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         output = self.dense(concat_attention)  # (batch_size, seq_len_q, d_model
         return output
 
+
 transformer_dropout_rate = 0.1
+
 
 class Transformer(tf.keras.layers.Layer):
     def __init__(self, d_model, num_heads, dff, rate=transformer_dropout_rate):
         super(Transformer, self).__init__()
 
         self.mha = MultiHeadAttention(d_model, num_heads)
-        self.ffn = tf.keras.Sequential([
-            tf.keras.layers.Dense(dff, activation='relu', bias_regularizer=regularizers.l2(Config['bias_regularizer'])),  # (batch_size, seq_len, dff)
-            tf.keras.layers.Dense(d_model, bias_regularizer=regularizers.l2(Config['bias_regularizer']))  # (batch_size, seq_len, d_model)
-        ])
+        self.ffn = tf.keras.Sequential(
+            [
+                tf.keras.layers.Dense(
+                    dff, activation="relu", bias_regularizer=regularizers.l2(Config["bias_regularizer"])
+                ),  # (batch_size, seq_len, dff)
+                tf.keras.layers.Dense(
+                    d_model, bias_regularizer=regularizers.l2(Config["bias_regularizer"])
+                ),  # (batch_size, seq_len, d_model)
+            ]
+        )
 
         self.layernorm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
         self.layernorm2 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
@@ -142,24 +161,29 @@ class Transformer(tf.keras.layers.Layer):
         out2 = self.layernorm2(out1 + ffn_output)  # (batch_size, input_seq_len, d_model)
 
         return out2
-    
+
+
 class Bert(tf.keras.Model):
     def __init__(self, config, **kwargs):
         super(Bert, self).__init__(**kwargs)
-        self.vocab_size = config['vocab_size']
-        self.embedding_size = config['embedding_size']
-        self.max_seq_len = config['max_sequence_length']
-        self.segment_size = config['segment_size']
-        self.num_transformer_layers = config['num_transformer_layers']
-        self.num_attention_heads = config['num_attention_heads']
-        self.intermediate_size = config['intermediate_size']
-        self.initializer_range = config['initializer_variance']
+        self.vocab_size = config["vocab_size"]
+        self.embedding_size = config["embedding_size"]
+        self.max_seq_len = config["max_sequence_length"]
+        self.segment_size = config["segment_size"]
+        self.num_transformer_layers = config["num_transformer_layers"]
+        self.num_attention_heads = config["num_attention_heads"]
+        self.intermediate_size = config["intermediate_size"]
+        self.initializer_range = config["initializer_variance"]
         self.initializer = tf.keras.initializers.TruncatedNormal(stddev=self.initializer_range)
-        self.embedding = EmbeddingProcessor(vocab_szie=self.vocab_size, embedding_size=self.embedding_size,
-                                            max_seq_len=self.max_seq_len,
-                                            segment_size=self.segment_size, )
-        self.transformer_blocks = [Transformer(d_model=self.embedding_size, num_heads=self.num_attention_heads,
-                                               dff=self.intermediate_size)] * self.num_transformer_layers
+        self.embedding = EmbeddingProcessor(
+            vocab_szie=self.vocab_size,
+            embedding_size=self.embedding_size,
+            max_seq_len=self.max_seq_len,
+            segment_size=self.segment_size,
+        )
+        self.transformer_blocks = [
+            Transformer(d_model=self.embedding_size, num_heads=self.num_attention_heads, dff=self.intermediate_size)
+        ] * self.num_transformer_layers
 
     def call(self, inputs, training=None):
         batch_x, batch_mask, batch_segment = inputs
@@ -174,8 +198,8 @@ class Bert(tf.keras.Model):
 
         return mlm_predict, sequence_output
 
-class BERT_Loss(tf.keras.layers.Layer):
 
+class BERT_Loss(tf.keras.layers.Layer):
     def __init__(self):
         super(BERT_Loss, self).__init__()
 
@@ -184,6 +208,8 @@ class BERT_Loss(tf.keras.layers.Layer):
 
         x_pred = tf.nn.softmax(mlm_predict, axis=-1)
         mlm_loss = tf.keras.losses.sparse_categorical_crossentropy(origin_x, x_pred)
-        mlm_loss = tf.math.reduce_sum(mlm_loss * batch_mlm_mask, axis=-1) / (tf.math.reduce_sum(batch_mlm_mask, axis=-1) + 1)
+        mlm_loss = tf.math.reduce_sum(mlm_loss * batch_mlm_mask, axis=-1) / (
+            tf.math.reduce_sum(batch_mlm_mask, axis=-1) + 1
+        )
 
         return mlm_loss
