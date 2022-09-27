@@ -11,9 +11,7 @@ from PIL import Image
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
 
-sys.path.append("../utils")
-
-from color_convertor import lab_to_rgb, rgb_to_lab
+from multipalette.utils.color_convertor import lab_to_rgb, rgb_to_lab
 
 
 def color_cluster_kmeans(image, color_numbers):

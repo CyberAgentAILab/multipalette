@@ -4,7 +4,7 @@ from collections import Counter
 
 import numpy as np
 import tensorflow as tf
-from model_config import Config
+from multipalette.colorbert.model_config import Config
 
 
 class Tokenizer:

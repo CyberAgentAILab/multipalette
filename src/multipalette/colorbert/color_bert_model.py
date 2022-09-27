@@ -1,5 +1,5 @@
 import tensorflow as tf
-from model_config import Config
+from multipalette.colorbert.model_config import Config
 from tensorflow.keras import regularizers
 
 
