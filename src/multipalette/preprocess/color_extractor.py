@@ -7,11 +7,10 @@ from operator import attrgetter, itemgetter
 
 import cv2
 import numpy as np
+from multipalette.utils.color_convertor import lab_to_rgb, rgb_to_lab
 from PIL import Image
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
-
-from multipalette.utils.color_convertor import lab_to_rgb, rgb_to_lab
 
 
 def color_cluster_kmeans(image, color_numbers):
