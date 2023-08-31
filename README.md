@@ -1,6 +1,6 @@
 # Color recommendation for vector graphic documents 
 
-Official implementation of [Color Recommendation for Vector Graphic Documents based on Multi-Palette Representation](https://arxiv.org/abs/2209.10820)
+Official implementation of [Color Recommendation for Vector Graphic Documents based on Multi-Palette Representation, WACV 2023](https://openaccess.thecvf.com/content/WACV2023/papers/Qiu_Color_Recommendation_for_Vector_Graphic_Documents_Based_on_Multi-Palette_Representation_WACV_2023_paper.pdf)
 
 ![Overview_image](docs/overview.png)
 
